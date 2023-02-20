@@ -1,4 +1,4 @@
-/*
+﻿/*
  *  YDLIDAR SYSTEM
  *  YDLIDAR ROS 2 Node
  *
@@ -31,6 +31,7 @@
 
 #define ROS2Verision "1.0.1"
 
+using namespace std;
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
@@ -40,7 +41,7 @@ int main(int argc, char *argv[]) {
   RCLCPP_INFO(node->get_logger(), "[YDLIDAR INFO] Current ROS Driver Version: %s\n", ((std::string)ROS2Verision).c_str());
 
   CYdLidar laser;
-  std::string str_optvalue = "/dev/ttyUSB0";
+  std::string str_optvalue = "/dev/ydlidar";
   node->declare_parameter("port");
   node->get_parameter("port", str_optvalue);
   ///lidar port
@@ -131,7 +132,7 @@ int main(int argc, char *argv[]) {
   node->get_parameter("angle_min", f_optvalue);
   laser.setlidaropt(LidarPropMinAngle, &f_optvalue, sizeof(float));
   /// unit: m
-  f_optvalue = 64.f;
+  f_optvalue = 16.f;
   node->declare_parameter("range_max");
   node->get_parameter("range_max", f_optvalue);
   laser.setlidaropt(LidarPropMaxRange, &f_optvalue, sizeof(float));
@@ -140,7 +141,7 @@ int main(int argc, char *argv[]) {
   node->get_parameter("range_min", f_optvalue);
   laser.setlidaropt(LidarPropMinRange, &f_optvalue, sizeof(float));
   /// unit: Hz
-  f_optvalue = 10.f;
+  f_optvalue = 5.f;
   node->declare_parameter("frequency");
   node->get_parameter("frequency", f_optvalue);
   laser.setlidaropt(LidarPropScanFrequency, &f_optvalue, sizeof(float));
@@ -200,78 +201,66 @@ int main(int argc, char *argv[]) {
       scan_msg->range_min = scan.config.min_range;
       scan_msg->range_max = scan.config.max_range;
       
+
+
+    float range_data[1050] = {0};
+
       int size = (scan.config.max_angle - scan.config.min_angle)/ scan.config.angle_increment + 1;
       scan_msg->ranges.resize(size);
       scan_msg->intensities.resize(size);
-      int point01 = scan.points.size();
-      printf("%d\n", point01);
-      float angle_sum = 0;
-      //int angle_num = 0;
-      //float angle_minsum = 0;
-      //float angle_plusum = 0;
-      float samenum_min = 0;
-      float samenum_plu = 0;
-      float distance[430];
-      int k = 0;
-      int linecnt = 0;
 
-      for(int i=0; i < point01; i++) {
-        int index = std::ceil((scan.points[i].angle - scan.config.min_angle)/scan.config.angle_increment);
-	if(scan.points[i].angle < 0 && scan.points[i].range > 0) {
-	angle_sum -= scan.points[i].angle;
-	samenum_min = scan.points[i-1].range;
-	   if(scan.points[i].range != samenum_min) {
-		distance[k] = scan.points[i].range;
-	    }
-	    else {
-		distance[k] = 0;
-	    }
-		if(distance[k] != 0) {
-		    //printf("%d Angle:%f distance:%f intensity:%f \n", i, angle_minsum, distance[k], scan.points[i].intensity);
-		    printf("Angle:%f distance:%f  ", angle_sum, distance[k]);
-		    linecnt++;
-			}
-		if(linecnt == 3) {
-			printf("\n");
-			linecnt = 0;
-		}
-		k++;
-	}
-
-	else if(scan.points[i].angle > 0 && scan.points[i].range > 0) {
-	angle_sum += scan.points[i].angle;
-	samenum_plu = scan.points[i-1].range;
-	   if(scan.points[i].range != samenum_plu) {
-		distance[k] = scan.points[i].range;
-	    }
-	    else {
-		distance[k] = 0;
-	    }
-		if(distance[k] != 0) {
-		   //printf("%d Angle:%f distance:%f intensity:%f \n", i, angle_plusum, distance[k], scan.points[i].intensity);
-		   printf("Angle:%f distance:%f  ", angle_sum, distance[k]);
-		   linecnt++;
-			}
-		if(linecnt == 3) {
-			printf("\n");
-			linecnt = 0;
-		}
-		k++;
-	}
-        //printf("%d Angle:%f distance:%f intensity:%f \n", i, scan.points[i].angle, scan.points[i].range, scan.points[i].intensity); 
-	if(index >=0 && index < size) {
-          scan_msg->ranges[index] = scan.points[i].range;
-          scan_msg->intensities[index] = scan.points[i].intensity;
-        }
-      }
-      //original code
-     /*for(size_t i=0; i < scan.points.size(); i++) {
+      for(size_t i=0; i < scan.points.size(); i++) {
         int index = std::ceil((scan.points[i].angle - scan.config.min_angle)/scan.config.angle_increment);
         if(index >=0 && index < size) {
           scan_msg->ranges[index] = scan.points[i].range;
           scan_msg->intensities[index] = scan.points[i].intensity;
-        }
-      }*/
+
+	    range_data[i] = scan.points[i].range;
+	}
+      }
+
+//my code
+
+	//array code start
+	    const int num_arrays = 360;
+	    int points = scan.points.size();
+
+	    int arr_size = sizeof(range_data) / sizeof(range_data[0]);
+	    std::vector<float> data(range_data, range_data + arr_size);
+	    vector<vector<float>> arrays(num_arrays);
+
+	    int elements_per_array = points / num_arrays;
+
+		for (int j = 0; j < num_arrays; j++) {
+	            for (int k = j * elements_per_array; k < (j + 1) * elements_per_array; k++) {
+			arrays[j].push_back(data[k]);
+	            }
+	        } //array code end
+
+	//950data input code start
+	/*int size_of_points = scan.points.size();
+	const int num_arrays = 360;
+	int elements_per_array = size_of_points / num_arrays;
+	vector<vector<float>> arrays(num_arrays);
+	int count = 0;
+
+	while (cin >> scan.points[i].range) {
+	    arrays[count / elements_per_array].push_back(scan.points[i].range);
+	    count++;
+
+	    if (count == size_of_points) { break; }
+	}*/  //950data input code end
+
+
+	//output code start
+	for(int a = 0; a < num_arrays; a++) {
+	    cout << "Array " << a << ": ";
+	    for(int b = 0; b < arrays[a].size(); b++) {
+		cout << arrays[a][b] << " ";
+	    }
+	    cout << endl;
+	} //output code end
+//my code
 
       laser_pub->publish(*scan_msg);
 
