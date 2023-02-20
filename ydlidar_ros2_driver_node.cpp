@@ -237,21 +237,6 @@ int main(int argc, char *argv[]) {
 	            }
 	        } //array code end
 
-	//950data input code start
-	/*int size_of_points = scan.points.size();
-	const int num_arrays = 360;
-	int elements_per_array = size_of_points / num_arrays;
-	vector<vector<float>> arrays(num_arrays);
-	int count = 0;
-
-	while (cin >> scan.points[i].range) {
-	    arrays[count / elements_per_array].push_back(scan.points[i].range);
-	    count++;
-
-	    if (count == size_of_points) { break; }
-	}*/  //950data input code end
-
-
 	//output code start
 	for(int a = 0; a < num_arrays; a++) {
 	    cout << "Array " << a << ": ";
