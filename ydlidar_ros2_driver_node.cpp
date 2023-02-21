@@ -1,4 +1,4 @@
-﻿/*
+/*
  *  YDLIDAR SYSTEM
  *  YDLIDAR ROS 2 Node
  *
@@ -18,6 +18,8 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <unistd.h>
+//#include <python.h>
 
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -219,9 +221,9 @@ int main(int argc, char *argv[]) {
 	}
       }
 
-//my code
+//my code start
 
-	//array code start
+	//data input code start
 	    const int num_arrays = 360;
 	    int points = scan.points.size();
 
@@ -229,23 +231,51 @@ int main(int argc, char *argv[]) {
 	    std::vector<float> data(range_data, range_data + arr_size);
 	    vector<vector<float>> arrays(num_arrays);
 
-	    int elements_per_array = points / num_arrays;
+	    //int elements_per_array = points / num_arrays;
+
+		int index = 0;
 
 		for (int j = 0; j < num_arrays; j++) {
-	            for (int k = j * elements_per_array; k < (j + 1) * elements_per_array; k++) {
-			arrays[j].push_back(data[k]);
-	            }
-	        } //array code end
+		    int num_elements = points / num_arrays;
+		    if(j < points % num_arrays) {
+			num_elements++;
+		    }
+		    for(int k = 0; k < num_elements; k++) {
+			arrays[j].push_back(data[index]);
+			index++;
+		    }
 
-	//output code start
-	for(int a = 0; a < num_arrays; a++) {
+	           // for (int k = j * elements_per_array; k < (j + 1) * elements_per_array; k++) {
+		   //     arrays[j].push_back(data[k]);
+	           // }
+	        } //data input code end
+
+	//close warning code start
+	    float arr_sum = 0;
+	    float col_sum = 0;
+
+	    for (int a = 0; a < 5; a++) {
+		for (long unsigned int b = 0; b < arrays[a].size(); b++) {
+		    col_sum += arrays[a][b];
+		    arr_sum = col_sum / arrays[a].size();
+		}
+	    }
+	    float avg = arr_sum / 5;
+	    sleep(1);
+	    if (avg < 0.7) { cout<<"\n\n\n\t\tWARNING TOO CLOSE\n\n\n"<<endl; }
+	    else { cout<<"\n\n\n\t\tIT's OK\n\n\n"<<endl; }
+	//close warning code end
+
+
+	//array output code start
+	/*for(int a = 0; a < num_arrays; a++) {
 	    cout << "Array " << a << ": ";
-	    for(int b = 0; b < arrays[a].size(); b++) {
+	    for(long unsigned int b = 0; b < arrays[a].size(); b++) {
 		cout << arrays[a][b] << " ";
 	    }
 	    cout << endl;
-	} //output code end
-//my code
+	}*/ //array output code end
+//my code end
 
       laser_pub->publish(*scan_msg);
 
