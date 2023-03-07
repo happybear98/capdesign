@@ -19,7 +19,19 @@
 #include <iostream>
 #include <memory>
 #include <unistd.h>
-//#include <python.h>
+
+/*
+#define HAVE_ROUND
+#ifdef _DEBUG
+#define RESTORE_DEBUG
+#undef _DEBUG
+#endif
+#include <Python.h>
+#ifdef RESTORE_DEBUG
+#define _DEBUG
+#undef RESTORE_DEBUG
+#endif
+*/
 
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -31,12 +43,22 @@
 #include <string>
 #include <signal.h>
 
+#include <time.h>
+#include <fstream>
+#include <csignal>
+#include <stdlib.h>
+
 #define ROS2Verision "1.0.1"
+
+//#define RAD2DEG(x) ((x)*180./M_PI)
+
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
+
+  //PyObject* 
 
   auto node = rclcpp::Node::make_shared("ydlidar_ros2_driver_node");
 
@@ -184,6 +206,7 @@ int main(int argc, char *argv[]) {
 
   rclcpp::WallRate loop_rate(20);
 
+
   while (ret && rclcpp::ok()) {
 
     LaserScan scan;//
@@ -222,7 +245,6 @@ int main(int argc, char *argv[]) {
       }
 
 //my code start
-
 	//data input code start
 	    const int num_arrays = 360;
 	    int points = scan.points.size();
@@ -250,21 +272,42 @@ int main(int argc, char *argv[]) {
 	           // }
 	        } //data input code end
 
+
+
 	//close warning code start
 	    float arr_sum = 0;
 	    float col_sum = 0;
 
-	    for (int a = 0; a < 5; a++) {
+	    for (int a = 0; a < 360; a++) {
 		for (long unsigned int b = 0; b < arrays[a].size(); b++) {
-		    col_sum += arrays[a][b];
-		    arr_sum = col_sum / arrays[a].size();
+		    if (arrays[a][b] != 0) {
+
+			if ((a < 90) && (arrays[a][b] < 0.65)) {
+			    cout << "\n\n\nFRONT WARNING!\n\n\n" << endl;
+			}
+			else if ((90 <= a) && (a < 180) && (arrays[a][b] < 0.5)) {
+			    cout << "\n\n\nRIGNT WARNING!\n\n\n" << endl;
+			}
+			else if ((180 <= a) && (a < 270) && (arrays[a][b] < 0.65)) {
+			    cout << "\n\n\nBACK WARNGING!\n\n\n" << endl;
+			}
+			else if ((270 <= a) && (a < 360) && (arrays[a][b] < 0.5)) {
+			    cout << "\n\n\nLEFT WARNGING!\n\n\n" << endl;
+			}
+		    }
+        usleep(500);
 		}
+
+		//else cout << "\n\n\n-\n\n\n" << endl;
+
 	    }
-	    float avg = arr_sum / 5;
-	    sleep(1);
-	    if (avg < 0.7) { cout<<"\n\n\n\t\tWARNING TOO CLOSE\n\n\n"<<endl; }
-	    else { cout<<"\n\n\n\t\tIT's OK\n\n\n"<<endl; }
+
+
+
+	    //if (avg < 0.7) { cout<<"\n\n\n\t\tWARNING TOO CLOSE\n\n\n"<<endl; }
+	    //else { cout<<"\n\n\n\t\tIT's OK\n\n\n"<<endl; }
 	//close warning code end
+
 
 
 	//array output code start
@@ -278,7 +321,6 @@ int main(int argc, char *argv[]) {
 //my code end
 
       laser_pub->publish(*scan_msg);
-
 
     } else {
       RCLCPP_ERROR(node->get_logger(), "Failed to get scan");
@@ -295,6 +337,8 @@ int main(int argc, char *argv[]) {
   laser.turnOff();
   laser.disconnecting();
   rclcpp::shutdown();
+  //Py_Finalize();
 
   return 0;
 }
+
