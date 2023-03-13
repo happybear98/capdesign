@@ -33,6 +33,11 @@
 #endif
 */
 
+//motor include start
+#include "wiringPi.h"
+#include <softPwm.h>
+//motor include end
+
 #include "rclcpp/clock.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time_source.hpp"
@@ -55,10 +60,123 @@
 
 using namespace std;
 
+//motor value start
+// FL-MOTER
+#define EN_FL 23
+#define IN_FL_1 22
+#define IN_FL_2 21
+int OUT_FL_1 = LOW;
+int OUT_FL_2 = LOW;
+
+// BL-MOTER
+#define EN_BL 29
+#define IN_BL_1 28
+#define IN_BL_2 27
+int OUT_BL_1 = LOW;
+int OUT_BL_2 = LOW;
+
+// FR-MOTER
+#define EN_FR 4
+#define IN_FR_1 5
+#define IN_FR_2 6
+int OUT_FR_1 = LOW;
+int OUT_FR_2 = LOW;
+
+// BR-MOTER
+#define EN_BR 3
+#define IN_BR_1 2
+#define IN_BR_2 0
+int OUT_BR_1 = LOW;
+int OUT_BR_2 = LOW;
+
+string st_ready = "ready";
+string st_go = "go";
+string st_back = "back";
+string st_right = "right";
+string st_left = "left";
+
+ void state_value(string state) {
+    if (state == "ready") {
+      OUT_FL_1 = OUT_FL_2 = OUT_FR_1 = OUT_FR_2 = OUT_BL_1 =  OUT_BL_2 = OUT_BR_1 = OUT_BR_2 = LOW;
+      softPwmWrite(EN_FL, 0);
+      softPwmWrite(EN_BL, 0);
+      softPwmWrite(EN_FR, 0);
+      softPwmWrite(EN_BR, 0);
+    }
+    else if (state == "go") {
+      OUT_FL_1 = OUT_FR_2 = OUT_BL_1 = OUT_BR_2 = LOW;
+      OUT_FL_2 = OUT_FR_1 = OUT_BL_2 = OUT_BR_1 = HIGH;
+      softPwmWrite(EN_FL, 100);
+      softPwmWrite(EN_BL, 100);
+      softPwmWrite(EN_FR, 100);
+      softPwmWrite(EN_BR, 100);
+    }
+    else if (state == "back") {
+      OUT_FL_1 = OUT_FR_2 = OUT_BL_1 = OUT_BR_2 = HIGH;
+      OUT_FL_2 = OUT_FR_1 = OUT_BL_2 = OUT_BR_1 = LOW;
+      softPwmWrite(EN_FL, 100);
+      softPwmWrite(EN_BL, 100);
+      softPwmWrite(EN_FR, 100);
+      softPwmWrite(EN_BR, 100);
+    }
+    else if (state == "right") {
+      OUT_FL_1 = OUT_FR_1 = OUT_BL_1 = OUT_BR_1 = HIGH;
+      OUT_FL_2 = OUT_FR_2 = OUT_BL_2 = OUT_BR_2 = LOW;
+      softPwmWrite(EN_FL, 100);
+      softPwmWrite(EN_BL, 100);
+      softPwmWrite(EN_FR, 100);
+      softPwmWrite(EN_BR, 100);
+    }
+    else if (state == "left") {
+      OUT_FL_2 = OUT_FR_2 = OUT_BL_2 = OUT_BR_2 = HIGH;
+      OUT_FL_1 = OUT_FR_1 = OUT_BL_1 = OUT_BR_1 = LOW;
+      softPwmWrite(EN_FL, 100);
+      softPwmWrite(EN_BL, 100);
+      softPwmWrite(EN_FR, 100);
+      softPwmWrite(EN_BR, 100);
+    }
+  }
+//motor value end
+
+
+
 int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
 
-  //PyObject* 
+  wiringPiSetup();
+	
+   //motor code start
+  // FL-MOTER
+  pinMode(EN_FL, OUTPUT);
+  pinMode(IN_FL_1, OUTPUT);
+  pinMode(IN_FL_2, OUTPUT);
+  softPwmCreate(EN_FL, 0, 100);
+  softPwmWrite(EN_FL, 0);
+
+  // BL-MOTER
+  pinMode(EN_BL, OUTPUT);
+  pinMode(IN_BL_1, OUTPUT);
+  pinMode(IN_BL_2, OUTPUT);
+  softPwmCreate(EN_BL, 0, 100);
+  softPwmWrite(EN_BL, 0);
+
+  // FR-MOTER
+  pinMode(EN_FR, OUTPUT);
+  pinMode(IN_FR_1, OUTPUT);
+  pinMode(IN_FR_2, OUTPUT);
+  softPwmCreate(EN_FR, 0, 100);
+  softPwmWrite(EN_FR, 0);
+
+  // BR-MOTER
+  pinMode(EN_BR, OUTPUT);
+  pinMode(IN_BR_1, OUTPUT);
+  pinMode(IN_BR_2, OUTPUT);
+  softPwmCreate(EN_BR, 0, 100);
+  softPwmWrite(EN_BR, 0);
+
+  string input;
+  //motor code end
+
 
   auto node = rclcpp::Node::make_shared("ydlidar_ros2_driver_node");
 
@@ -284,18 +402,56 @@ int main(int argc, char *argv[]) {
 
 			if ((a < 90) && (arrays[a][b] < 0.65)) {
 			    cout << "\n\n\nFRONT WARNING!\n\n\n" << endl;
+			    state_value(st_ready);
+                            //sleep(0.3);
+                            digitalWrite(IN_FL_1, OUT_FL_1);
+                            digitalWrite(IN_FL_2, OUT_FL_2);
+                            digitalWrite(IN_BL_1, OUT_BL_1);
+                            digitalWrite(IN_BL_2, OUT_BL_2);
+
+                            digitalWrite(IN_FR_1, OUT_FR_1);
+                            digitalWrite(IN_FR_2, OUT_FR_2);
+                            digitalWrite(IN_BR_1, OUT_BR_1);
+                            digitalWrite(IN_BR_2, OUT_BR_2);
+                            sleep(1);
 			}
 			else if ((90 <= a) && (a < 180) && (arrays[a][b] < 0.5)) {
 			    cout << "\n\n\nRIGNT WARNING!\n\n\n" << endl;
 			}
 			else if ((180 <= a) && (a < 270) && (arrays[a][b] < 0.65)) {
 			    cout << "\n\n\nBACK WARNGING!\n\n\n" << endl;
+			    state_value(st_go);
+                            //sleep(0.3);
+                            digitalWrite(IN_FL_1, OUT_FL_1);
+                            digitalWrite(IN_FL_2, OUT_FL_2);
+                            digitalWrite(IN_BL_1, OUT_BL_1);
+                            digitalWrite(IN_BL_2, OUT_BL_2);
+
+                            digitalWrite(IN_FR_1, OUT_FR_1);
+                            digitalWrite(IN_FR_2, OUT_FR_2);
+                            digitalWrite(IN_BR_1, OUT_BR_1);
+                            digitalWrite(IN_BR_2, OUT_BR_2);
+                            sleep(1);
 			}
 			else if ((270 <= a) && (a < 360) && (arrays[a][b] < 0.5)) {
 			    cout << "\n\n\nLEFT WARNGING!\n\n\n" << endl;
 			}
+			else {
+			    state_value(st_ready);
+			    //sleep(0.3);
+			    digitalWrite(IN_FL_1, OUT_FL_1);
+                            digitalWrite(IN_FL_2, OUT_FL_2);
+                            digitalWrite(IN_BL_1, OUT_BL_1);
+                            digitalWrite(IN_BL_2, OUT_BL_2);
+
+                            digitalWrite(IN_FR_1, OUT_FR_1);
+                            digitalWrite(IN_FR_2, OUT_FR_2);
+                            digitalWrite(IN_BR_1, OUT_BR_1);
+                            digitalWrite(IN_BR_2, OUT_BR_2);
+                            sleep(1);
+			}
 		    }
-        usleep(500);
+        //usleep(500);
 		}
 
 		//else cout << "\n\n\n-\n\n\n" << endl;
