@@ -397,6 +397,7 @@ int main(int argc, char *argv[]) {
 	    float col_sum = 0;
 
 	    for (int a = 0; a < 360; a++) {
+		    ros::Duration duration(1./2.);
 		for (long unsigned int b = 0; b < arrays[a].size(); b++) {
 		    if (arrays[a][b] != 0) {
 
@@ -413,7 +414,7 @@ int main(int argc, char *argv[]) {
                             digitalWrite(IN_FR_2, OUT_FR_2);
                             digitalWrite(IN_BR_1, OUT_BR_1);
                             digitalWrite(IN_BR_2, OUT_BR_2);
-                            sleep(1);
+                            //sleep(1);
 			}
 			else if ((90 <= a) && (a < 180) && (arrays[a][b] < 0.5)) {
 			    cout << "\n\n\nRIGNT WARNING!\n\n\n" << endl;
@@ -431,7 +432,7 @@ int main(int argc, char *argv[]) {
                             digitalWrite(IN_FR_2, OUT_FR_2);
                             digitalWrite(IN_BR_1, OUT_BR_1);
                             digitalWrite(IN_BR_2, OUT_BR_2);
-                            sleep(1);
+                            //sleep(1);
 			}
 			else if ((270 <= a) && (a < 360) && (arrays[a][b] < 0.5)) {
 			    cout << "\n\n\nLEFT WARNGING!\n\n\n" << endl;
@@ -448,14 +449,11 @@ int main(int argc, char *argv[]) {
                             digitalWrite(IN_FR_2, OUT_FR_2);
                             digitalWrite(IN_BR_1, OUT_BR_1);
                             digitalWrite(IN_BR_2, OUT_BR_2);
-                            sleep(1);
+                           //sleep(1);
 			}
 		    }
-        //usleep(500);
 		}
-
-		//else cout << "\n\n\n-\n\n\n" << endl;
-
+		duration.sleep();
 	    }
 
 
