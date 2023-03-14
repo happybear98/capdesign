@@ -89,11 +89,11 @@ int OUT_FR_2 = LOW;
 int OUT_BR_1 = LOW;
 int OUT_BR_2 = LOW;
 
-string st_ready = "ready";
-string st_go = "go";
-string st_back = "back";
-string st_right = "right";
-string st_left = "left";
+//string st_ready = "ready";
+//string st_go = "go";
+//string st_back = "back";
+//string st_right = "right";
+//string st_left = "left";
 
  /*void state_value(string state) {
     if (state == "ready") {
