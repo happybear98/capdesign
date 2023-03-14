@@ -95,7 +95,7 @@ string st_back = "back";
 string st_right = "right";
 string st_left = "left";
 
- void state_value(string state) {
+ /*void state_value(string state) {
     if (state == "ready") {
       OUT_FL_1 = OUT_FL_2 = OUT_FR_1 = OUT_FR_2 = OUT_BL_1 =  OUT_BL_2 = OUT_BR_1 = OUT_BR_2 = LOW;
       softPwmWrite(EN_FL, 0);
@@ -135,7 +135,7 @@ string st_left = "left";
       softPwmWrite(EN_FR, 100);
       softPwmWrite(EN_BR, 100);
     }
-  }
+  }*/
 //motor value end
 
 
@@ -393,67 +393,95 @@ int main(int argc, char *argv[]) {
 
 
 	//close warning code start
-	    float arr_sum = 0;
-	    float col_sum = 0;
+	    //float arr_sum = 0;
+	    //float col_sum = 0;
 
 	    for (int a = 0; a < 360; a++) {
-		    ros::Duration duration(1./2.);
+		    //ros::Duration duration(1./2.);
 		for (long unsigned int b = 0; b < arrays[a].size(); b++) {
 		    if (arrays[a][b] != 0) {
 
-			if ((a < 90) && (arrays[a][b] < 0.65)) {
+			if ((a < 90) && (arrays[a][b] < 1)) {
 			    cout << "\n\n\nFRONT WARNING!\n\n\n" << endl;
-			    state_value(st_ready);
-                            //sleep(0.3);
-                            digitalWrite(IN_FL_1, OUT_FL_1);
-                            digitalWrite(IN_FL_2, OUT_FL_2);
-                            digitalWrite(IN_BL_1, OUT_BL_1);
-                            digitalWrite(IN_BL_2, OUT_BL_2);
-
-                            digitalWrite(IN_FR_1, OUT_FR_1);
-                            digitalWrite(IN_FR_2, OUT_FR_2);
-                            digitalWrite(IN_BR_1, OUT_BR_1);
-                            digitalWrite(IN_BR_2, OUT_BR_2);
-                            //sleep(1);
+			    digitalWrite(IN_FL_1, LOW);
+    			    digitalWrite(IN_FL_2, LOW);
+     			    digitalWrite(IN_BL_1, LOW);
+   			    digitalWrite(IN_BL_2, LOW);
+    			    digitalWrite(IN_FR_1, LOW);
+   		 	    digitalWrite(IN_FR_2, LOW);
+  			    digitalWrite(IN_BR_1, LOW);
+   			    digitalWrite(IN_BR_2, LOW);
+   			    softPwmWrite(EN_FL, 0);
+    			    softPwmWrite(EN_BL, 0);
+    			    softPwmWrite(EN_FR, 0);
+    			    softPwmWrite(EN_BR, 0);
 			}
-			else if ((90 <= a) && (a < 180) && (arrays[a][b] < 0.5)) {
+			else if ((90 <= a) && (a < 180) && (arrays[a][b] < 0.8)) {
 			    cout << "\n\n\nRIGNT WARNING!\n\n\n" << endl;
 			}
-			else if ((180 <= a) && (a < 270) && (arrays[a][b] < 0.65)) {
+			else if ((180 <= a) && (a < 270) && (arrays[a][b] < 1)) {
 			    cout << "\n\n\nBACK WARNGING!\n\n\n" << endl;
-			    state_value(st_go);
-                            //sleep(0.3);
-                            digitalWrite(IN_FL_1, OUT_FL_1);
-                            digitalWrite(IN_FL_2, OUT_FL_2);
-                            digitalWrite(IN_BL_1, OUT_BL_1);
-                            digitalWrite(IN_BL_2, OUT_BL_2);
-
-                            digitalWrite(IN_FR_1, OUT_FR_1);
-                            digitalWrite(IN_FR_2, OUT_FR_2);
-                            digitalWrite(IN_BR_1, OUT_BR_1);
-                            digitalWrite(IN_BR_2, OUT_BR_2);
-                            //sleep(1);
+			    OUT_FL_1 = LOW;
+   			    OUT_FL_2 = HIGH;
+   			    digitalWrite(IN_FL_1, OUT_FL_1);
+  			    digitalWrite(IN_FL_2, OUT_FL_2);
+  			    softPwmWrite(EN_FL, 50);
+      
+    			    // BL-MOTER 전진
+    			    OUT_BL_1 = LOW;
+   			    OUT_BL_2 = HIGH;
+   			    digitalWrite(IN_BL_1, OUT_BL_1);
+    			    digitalWrite(IN_BL_2, OUT_BL_2);
+    			    softPwmWrite(EN_BL, 50);
+      
+     			    // FR-MOTER 전진
+    			    OUT_FR_1 = HIGH;
+    			    OUT_FR_2 = LOW;
+    			    digitalWrite(IN_FR_1, OUT_FR_1);
+    			    digitalWrite(IN_FR_2, OUT_FR_2);
+    			    softPwmWrite(EN_FR, 50);
+      
+   			     // BR-MOTER 전진
+   			     OUT_BR_1 = HIGH;
+   			     OUT_BR_2 = LOW;
+    			     digitalWrite(IN_BR_1, OUT_BR_1);
+    			     digitalWrite(IN_BR_2, OUT_BR_2);
+     			     softPwmWrite(EN_BR, 50);
 			}
-			else if ((270 <= a) && (a < 360) && (arrays[a][b] < 0.5)) {
+			else if ((270 <= a) && (a < 360) && (arrays[a][b] < 0.8)) {
 			    cout << "\n\n\nLEFT WARNGING!\n\n\n" << endl;
 			}
 			else {
-			    state_value(st_ready);
-			    //sleep(0.3);
-			    digitalWrite(IN_FL_1, OUT_FL_1);
-                            digitalWrite(IN_FL_2, OUT_FL_2);
-                            digitalWrite(IN_BL_1, OUT_BL_1);
-                            digitalWrite(IN_BL_2, OUT_BL_2);
-
-                            digitalWrite(IN_FR_1, OUT_FR_1);
-                            digitalWrite(IN_FR_2, OUT_FR_2);
-                            digitalWrite(IN_BR_1, OUT_BR_1);
-                            digitalWrite(IN_BR_2, OUT_BR_2);
-                           //sleep(1);
+			    OUT_FL_1 = LOW;
+   			    OUT_FL_2 = HIGH;
+   			    digitalWrite(IN_FL_1, OUT_FL_1);
+  			    digitalWrite(IN_FL_2, OUT_FL_2);
+  			    softPwmWrite(EN_FL, 50);
+      
+    			    // BL-MOTER 전진
+    			    OUT_BL_1 = LOW;
+   			    OUT_BL_2 = HIGH;
+   			    digitalWrite(IN_BL_1, OUT_BL_1);
+    			    digitalWrite(IN_BL_2, OUT_BL_2);
+    			    softPwmWrite(EN_BL, 50);
+      
+     			    // FR-MOTER 전진
+    			    OUT_FR_1 = HIGH;
+    			    OUT_FR_2 = LOW;
+    			    digitalWrite(IN_FR_1, OUT_FR_1);
+    			    digitalWrite(IN_FR_2, OUT_FR_2);
+    			    softPwmWrite(EN_FR, 50);
+      
+   			     // BR-MOTER 전진
+   			     OUT_BR_1 = HIGH;
+   			     OUT_BR_2 = LOW;
+    			     digitalWrite(IN_BR_1, OUT_BR_1);
+    			     digitalWrite(IN_BR_2, OUT_BR_2);
+     			     softPwmWrite(EN_BR, 50);
 			}
 		    }
 		}
-		duration.sleep();
+		//duration.sleep();
 	    }
 
 
